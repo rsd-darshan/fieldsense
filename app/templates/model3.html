@@ -1,0 +1,147 @@
+{% extends "minimal_base.html" %}
+{% block title %}Model 3 — Plant disease · FieldSense{% endblock %}
+{% block body_class %}page-model page-model--3{% endblock %}
+{% block content %}
+<article class="fs-model fs-model--leaf">
+    <header class="fs-model__hero">
+        <span class="fs-model__chip">Model 3</span>
+        <h1 class="fs-model__title">Plant disease</h1>
+        <div class="fs-model__intro">
+            <p class="fs-model__use">Upload one sharp photo of leaf or canopy tissue—<strong>JPEG</strong>, <strong>PNG</strong>, or <strong>WebP</strong>. <strong>Drag and drop</strong> an image onto the zone below, or use <strong>browse</strong>. The whole frame is scored at once: no masks, no tile strips, just a single image in good light.</p>
+            <p class="fs-model__use">You get the closest-matching condition, a short explanation, practical next steps, extra notes when we have them for that case, and a saved copy of your image. A health snapshot updates with the result, <strong>History</strong> records the finding, and your field overview reflects the new photo-based signal.</p>
+        </div>
+    </header>
+    <div class="fs-model__work">
+        <h2 class="fs-model__h2">Run</h2>
+        <div class="fs-model__form">
+            <form id="f" class="stack">
+                <label class="fs-dropzone-label" for="img">Image</label>
+                <div
+                    id="dz"
+                    class="fs-dropzone"
+                    role="button"
+                    tabindex="0"
+                    aria-describedby="dz-help"
+                >
+                    <input
+                        id="img"
+                        class="fs-dropzone__input"
+                        name="image"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/jpg"
+                        required
+                        aria-label="Leaf or canopy image: drop a file here or tap to choose JPEG, PNG, or WebP"
+                    >
+                    <div class="fs-dropzone__inner">
+                        <p id="dz-help" class="fs-dropzone__title">Drop image here</p>
+                        <p class="fs-dropzone__sub">or <span class="fs-dropzone__browse">choose file</span> (JPEG, PNG, WebP)</p>
+                        <p id="dz-file" class="fs-dropzone__file" hidden></p>
+                    </div>
+                </div>
+                <div class="full fs-mt"><button type="submit" class="btn">Predict disease</button></div>
+            </form>
+        </div>
+    </div>
+    <section class="fs-model__result fs-model__result--full">
+        <h2 class="fs-model__h2">Result</h2>
+        <div id="result" class="fs-result-mount" role="status" aria-live="polite" hidden></div>
+    </section>
+</article>
+<script src="/assets/js/fs-prediction-result.js"></script>
+<script>
+(function () {
+  const form = document.getElementById('f');
+  const dz = document.getElementById('dz');
+  const fi = document.getElementById('img');
+  const fname = document.getElementById('dz-file');
+  const result = document.getElementById('result');
+
+  const allowed = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+
+  function extOf(file) {
+    const n = file.name || '';
+    const i = n.lastIndexOf('.');
+    return i >= 0 ? n.slice(i).toLowerCase() : '';
+  }
+
+  function setFile(file) {
+    if (!file || !file.type.startsWith('image/')) {
+      FieldSenseResult.render(result, 'leaf', { error: 'Please use a JPEG, PNG, or WebP image.' }, null);
+      return false;
+    }
+    const ex = extOf(file);
+    if (!allowed.has(ex)) {
+      FieldSenseResult.render(result, 'leaf', { error: 'Use a .jpg, .jpeg, .png, or .webp file.' }, null);
+      return false;
+    }
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fi.files = dt.files;
+    fi.dispatchEvent(new Event('change', { bubbles: true }));
+    fname.hidden = false;
+    fname.textContent = file.name;
+    result.innerHTML = '';
+    result.className = 'fs-result-mount';
+    result.hidden = true;
+    return true;
+  }
+
+  dz.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      fi.click();
+    }
+  });
+
+  ['dragenter', 'dragover'].forEach((ev) => {
+    dz.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dz.classList.add('is-dragover');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach((ev) => {
+    dz.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dz.classList.remove('is-dragover');
+    });
+  });
+
+  dz.addEventListener('drop', (e) => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) setFile(f);
+  });
+
+  fi.addEventListener('change', () => {
+    const f = fi.files && fi.files[0];
+    if (f) {
+      fname.hidden = false;
+      fname.textContent = f.name;
+    } else {
+      fname.hidden = true;
+      fname.textContent = '';
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!fi.files.length) {
+      result.hidden = false;
+      result.className = 'fs-result-mount fs-result-mount--error';
+      result.innerHTML = '<div class="fs-result__card fs-result__card--error" role="alert"><p class="fs-result__err">Choose or drop an image first.</p></div>';
+      return;
+    }
+    FieldSenseResult.loading(result);
+    const fd = new FormData();
+    fd.append('image', fi.files[0]);
+    const r = await fetch('/api/fields/{{ field_id }}/predict/leaf', { method: 'POST', body: fd });
+    let data;
+    try { data = JSON.parse(await r.text()); } catch { data = { error: 'We could not read the response. Please try again.' }; }
+    if (!r.ok && !data.error) data = { error: 'Something went wrong. Please try again.' };
+    FieldSenseResult.render(result, 'leaf', data, null);
+  });
+})();
+</script>
+{% endblock %}

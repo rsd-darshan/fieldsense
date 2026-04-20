@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{% block title %}FieldSense{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,650;1,9..144,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/minimal.css">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<header class="site-header">
+    <nav class="site-nav" aria-label="Main">
+        <div class="site-nav-bar">
+            <a class="site-brand" href="{{ url_for('home') }}">FieldSense</a>
+            <ul class="site-nav-list">
+                <li><a href="{{ url_for('home') }}" class="site-nav-link site-nav-link--text {% if nav == 'home' %}is-active{% endif %}">Home</a></li>
+                <li><a href="{{ url_for('model1') }}" class="site-nav-link site-nav-link--label {% if nav == 'm1' %}is-active{% endif %}">Model 1</a></li>
+                <li><a href="{{ url_for('model2') }}" class="site-nav-link site-nav-link--label {% if nav == 'm2' %}is-active{% endif %}">Model 2</a></li>
+                <li><a href="{{ url_for('model3') }}" class="site-nav-link site-nav-link--label {% if nav == 'm3' %}is-active{% endif %}">Model 3</a></li>
+                <li><a href="/history" class="site-nav-link site-nav-link--text {% if nav == 'hist' %}is-active{% endif %}">History</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+<main class="site-main site-main--canvas">
+    {% block content %}{% endblock %}
+</main>
+<footer class="site-footer">
+    <div class="site-footer-inner">
+        <a href="https://github.com/rsd-darshan/FieldSense" target="_blank" rel="noopener noreferrer">GitHub — rsd-darshan/FieldSense</a>
+    </div>
+</footer>
+</body>
+</html>

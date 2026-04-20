@@ -1,0 +1,14 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+.ipynb_checkpoints/
+
+# Local SQLite (seeded at runtime)
+app/fieldsense.db
+
+# Ephemeral leaf image uploads (FieldSense /leaf)
+app/uploads/*
+!app/uploads/.gitkeep
+.vercel

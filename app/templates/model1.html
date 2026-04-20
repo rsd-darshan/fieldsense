@@ -1,0 +1,58 @@
+{% extends "minimal_base.html" %}
+{% block title %}Model 1 — Crop · FieldSense{% endblock %}
+{% block body_class %}page-model page-model--1{% endblock %}
+{% block content %}
+<article class="fs-model fs-model--crop">
+    <header class="fs-model__hero">
+        <span class="fs-model__chip">Model 1</span>
+        <h1 class="fs-model__title">Crop</h1>
+        <div class="fs-model__intro">
+            <p class="fs-model__use">Enter these seven readings: <strong>nitrogen (N)</strong>, <strong>phosphorus (P)</strong>, <strong>potassium (K)</strong>, <strong>pH</strong>, <strong>rainfall</strong>, <strong>temperature</strong>, and <strong>humidity</strong>. Leave a box empty and we fill it from your <strong>saved field profile</strong>—handy when you only want to update one measurement.</p>
+            <p class="fs-model__use">You get one recommended crop, the numbers that were actually used, a short health snapshot, and a brief rationale. The run appears in <strong>History</strong> and refreshes your field overview so fertilizer and photo checks stay in sync.</p>
+        </div>
+    </header>
+    <div class="fs-model__work">
+        <h2 class="fs-model__h2">Run</h2>
+        <div class="fs-model__form">
+            <form id="f" class="grid">
+                <div><label for="fs-crop-n">Nitrogen (N value)</label><input id="fs-crop-n" name="N" type="text" autocomplete="off" placeholder="e.g. 90"></div>
+                <div><label for="fs-crop-p">Phosphorus (P value)</label><input id="fs-crop-p" name="P" type="text" autocomplete="off" placeholder="e.g. 42"></div>
+                <div><label for="fs-crop-k">Potassium (K value)</label><input id="fs-crop-k" name="K" type="text" autocomplete="off" placeholder="e.g. 43"></div>
+                <div><label>Temperature (°C)</label><input name="temperature" type="text" autocomplete="off" placeholder="e.g. 22.5"></div>
+                <div><label>Humidity (%)</label><input name="humidity" type="text" autocomplete="off" placeholder="e.g. 82"></div>
+                <div><label>pH (0-14)</label><input name="ph" type="text" autocomplete="off" placeholder="e.g. 6.5"></div>
+                <div class="full"><label>Rainfall (mm)</label><input name="rainfall" type="text" autocomplete="off" placeholder="e.g. 205"></div>
+                <div class="full"><button type="submit" class="btn">Predict crop</button></div>
+            </form>
+        </div>
+    </div>
+    <section class="fs-model__result fs-model__result--full">
+        <h2 class="fs-model__h2">Result</h2>
+        <div id="result" class="fs-result-mount" role="status" aria-live="polite" hidden></div>
+    </section>
+</article>
+<script src="/assets/js/fs-prediction-result.js"></script>
+<script>
+document.getElementById('f').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = document.getElementById('result');
+  FieldSenseResult.loading(el);
+  const fd = new FormData(e.target);
+  const body = {};
+  fd.forEach((v, k) => { if (String(v).trim()) body[k] = String(v).trim(); });
+  if (!Object.keys(body).length) {
+    FieldSenseResult.render(el, 'crop', { error: 'Please fill at least one input before predicting.' }, null);
+    return;
+  }
+  const r = await fetch('/api/fields/{{ field_id }}/predict/crop', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  let data;
+  try { data = JSON.parse(await r.text()); } catch { data = { error: 'We could not read the response. Please try again.' }; }
+  if (!r.ok && !data.error) data = { error: 'Something went wrong. Please try again.' };
+  FieldSenseResult.render(el, 'crop', data, null);
+});
+</script>
+{% endblock %}

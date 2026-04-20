@@ -1,0 +1,70 @@
+{% extends "minimal_base.html" %}
+{% block title %}Model 2 — Fertilizer · FieldSense{% endblock %}
+{% block body_class %}page-model page-model--2{% endblock %}
+{% block content %}
+<article class="fs-model fs-model--fert">
+    <header class="fs-model__hero">
+        <span class="fs-model__chip">Model 2</span>
+        <h1 class="fs-model__title">Fertilizer</h1>
+        <div class="fs-model__intro">
+            <p class="fs-model__use">We weigh <strong>temperature</strong>, <strong>humidity</strong>, <strong>soil moisture</strong>, <strong>soil type</strong>, <strong>crop type</strong>, and lab-style <strong>nitrogen (N)</strong>, <strong>phosphorus (P)</strong>, and <strong>potassium (K)</strong> to suggest a <strong>fertilizer direction</strong>. Pick soil and crop from the lists (they match what the model knows), or choose <strong>Saved field value</strong> to reuse what is already on file.</p>
+            <p class="fs-model__use">Anything you enter overrides the saved profile; empty fields fall back to storage. You see the suggested class, every value that went into the decision, a health snapshot, and an updated field overview that includes your latest crop and photo-based findings when you have them.</p>
+        </div>
+    </header>
+    <div class="fs-model__work">
+        <h2 class="fs-model__h2">Run</h2>
+        <div class="fs-model__form">
+            <form id="f" class="grid">
+                <div><label>Temperature (°C)</label><input name="temperature" type="text" autocomplete="off" placeholder="e.g. 27.5"></div>
+                <div><label>Humidity (%)</label><input name="humidity" type="text" autocomplete="off" placeholder="e.g. 68"></div>
+                <div><label>Soil moisture (%)</label><input name="moisture" type="text" autocomplete="off" placeholder="e.g. 42"></div>
+                <div><label>Soil type</label>
+                    <select name="soil_type">
+                        <option value="">Saved field value</option>
+                        {% for s in soil_types %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div><label>Crop type</label>
+                    <select name="crop_type">
+                        <option value="">Saved field value</option>
+                        {% for c in crop_types %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div><label for="fs-fert-n">Nitrogen (N value)</label><input id="fs-fert-n" name="nitrogen" type="text" autocomplete="off" placeholder="e.g. 80"></div>
+                <div><label for="fs-fert-k">Potassium (K value)</label><input id="fs-fert-k" name="potassium" type="text" autocomplete="off" placeholder="e.g. 55"></div>
+                <div class="full"><label for="fs-fert-p">Phosphorus (P value)</label><input id="fs-fert-p" name="phosphorous" type="text" autocomplete="off" placeholder="e.g. 60"></div>
+                <div class="full"><button type="submit" class="btn">Predict fertilizer</button></div>
+            </form>
+        </div>
+    </div>
+    <section class="fs-model__result fs-model__result--full">
+        <h2 class="fs-model__h2">Result</h2>
+        <div id="result" class="fs-result-mount" role="status" aria-live="polite" hidden></div>
+    </section>
+</article>
+<script>window.__FS_FERT_CATALOG = {{ (fertilizer_catalog | default([], true)) | tojson }};</script>
+<script src="/assets/js/fs-prediction-result.js"></script>
+<script>
+document.getElementById('f').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = document.getElementById('result');
+  FieldSenseResult.loading(el);
+  const fd = new FormData(e.target);
+  const body = {};
+  fd.forEach((v, k) => { if (String(v).trim()) body[k] = String(v).trim(); });
+  if (!Object.keys(body).length) {
+    FieldSenseResult.render(el, 'fert', { error: 'Please fill at least one input before predicting.' }, window.__FS_FERT_CATALOG || []);
+    return;
+  }
+  const r = await fetch('/api/fields/{{ field_id }}/predict/fertilizer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  let data;
+  try { data = JSON.parse(await r.text()); } catch { data = { error: 'We could not read the response. Please try again.' }; }
+  if (!r.ok && !data.error) data = { error: 'Something went wrong. Please try again.' };
+  FieldSenseResult.render(el, 'fert', data, window.__FS_FERT_CATALOG || []);
+});
+</script>
+{% endblock %}

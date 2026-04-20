@@ -1,0 +1,73 @@
+{% extends "minimal_base.html" %}
+{% block title %}FieldSense — home{% endblock %}
+{% block body_class %}page-home{% endblock %}
+{% block content %}
+<div class="fs-home">
+  <header class="fs-home__masthead">
+    <div class="fs-home__title-block">
+      <h1 class="fs-display">FieldSense</h1>
+      <p class="fs-home__tagline" aria-hidden="true">Soil · weather · signal</p>
+    </div>
+    <p class="fs-lead">
+      <strong>FieldSense</strong> turns soil, weather, and an optional leaf photo into clear suggestions you can take to your agronomist. Nothing vague—just structured answers you can act on.
+    </p>
+  </header>
+
+  <section class="fs-tile fs-tile--tell fs-home__tell" aria-labelledby="fs-lbl-tell">
+    <h2 id="fs-lbl-tell" class="fs-kicker">You tell it about your field</h2>
+    <ul class="fs-list">
+      <li>What’s your soil like? (pH, moisture, nutrients such as nitrogen, phosphorus, and potassium — N, P, K)</li>
+      <li>What’s the weather like? (temperature, rainfall, humidity)</li>
+      <li>Optionally, upload one clear photo (leaf or canopy) for disease prediction.</li>
+    </ul>
+  </section>
+
+  <section class="fs-tile fs-tile--reply fs-home__reply" aria-labelledby="fs-lbl-reply">
+    <h2 id="fs-lbl-reply" class="fs-kicker">Then FieldSense tells you</h2>
+    <ul class="fs-list">
+      <li>Which crop fits your soil and climate numbers</li>
+      <li>Which fertilizer direction lines up with your soil, crop, and lab-style nitrogen, phosphorus, and potassium (N, P, K)</li>
+      <li>What a single clear leaf or canopy photo most likely points to</li>
+      <li>A quick health read and plain-language <em>why</em> behind each suggestion</li>
+    </ul>
+  </section>
+
+  <section class="fs-tile fs-tile--wide fs-home__expert" aria-labelledby="fs-lbl-expert">
+    <h2 id="fs-lbl-expert" class="visually-hidden">Expert in your pocket</h2>
+    <p class="fs-prose fs-prose--tight">
+      Think of it as soil-science vocabulary with a memory: every run is saved so you can see how recommendations shift as your numbers change.
+    </p>
+  </section>
+
+  <section class="fs-home__compare" aria-labelledby="fs-lbl-compare">
+    <h2 id="fs-lbl-compare" class="fs-kicker fs-kicker--row">Compared with only asking a human</h2>
+    <ul class="fs-compare">
+      <li class="fs-compare__item"><strong>Consistent</strong> — the same numbers yield the same structured answer every time.</li>
+      <li class="fs-compare__item"><strong>Transparent</strong> — you see what went in and how the app reasoned, not a black-box paragraph.</li>
+      <li class="fs-compare__item"><strong>Grounded</strong> — suggestions come from trained models on crop, soil, and (when you use a photo) leaf data—not free-form guessing.</li>
+      <li class="fs-compare__item"><strong>Tracked over time</strong> — each field keeps a timeline so you can compare this month to last.</li>
+    </ul>
+  </section>
+
+  <aside class="fs-quote fs-home__dialog" aria-label="Example conversation">
+    <p class="fs-quote__line"><strong>Farmer:</strong> “My field has pH 7.2, moisture about 60%, and potassium reads low.”</p>
+    <p class="fs-quote__line"><strong>FieldSense:</strong> “Given those numbers, wheat is a strong crop match; lean toward a potassium-forward fertilizer plan; overall field health from the rollup might land in the high 60s to 70s—good, but keep an eye on irrigation and re-check potassium (K) after the next soil test.”</p>
+    <p class="fs-quote__note">Next month you update the numbers → new predictions stack next to the old ones so you can see whether things improved.</p>
+  </aside>
+
+  <section class="fs-tile fs-tile--accent fs-home__closing" aria-labelledby="fs-lbl-close">
+    <h2 id="fs-lbl-close" class="visually-hidden">Summary</h2>
+    <p class="fs-prose fs-prose--tight">
+      Crop fit, fertilizer direction, photo-based plant checks, and next steps—together in one lightweight app you can run yourself or host.
+    </p>
+  </section>
+
+  <nav class="fs-home__actions" aria-label="Primary pages">
+    <a class="fs-pill" href="{{ url_for('model1') }}">Crop</a>
+    <a class="fs-pill" href="{{ url_for('model2') }}">Fertilizer</a>
+    <a class="fs-pill" href="{{ url_for('model3') }}">Plant disease</a>
+    <a class="fs-pill" href="/history">History</a>
+    <a class="fs-pill fs-pill--ghost" href="{{ url_for('api.health') }}">Status</a>
+  </nav>
+</div>
+{% endblock %}

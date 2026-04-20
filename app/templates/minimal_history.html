@@ -1,0 +1,52 @@
+{% extends "minimal_base.html" %}
+{% block title %}History · FieldSense{% endblock %}
+{% block body_class %}page-history{% endblock %}
+{% block content %}
+<div class="fs-history">
+  <header class="fs-history__head">
+    <h1 class="fs-history__title">Prediction history</h1>
+    <p class="fs-history__use">Latest crop, fertilizer, and photo checks across every field—newest first. Open Crop, Fertilizer, or Plant disease to add another run.</p>
+  </header>
+
+  {% if rows %}
+  <div class="history-wrap">
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th scope="col">When</th>
+          <th scope="col">Farm / field</th>
+          <th scope="col">Kind</th>
+          <th scope="col">Result</th>
+          <th scope="col">Health</th>
+          <th scope="col">Risk</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td class="history-table__mono">{{ r.created_at }}</td>
+          <td><span class="history-table__farm">{{ r.farm_name }}</span> · {{ r.field_name }}</td>
+          <td>{{ r.kind_label }}</td>
+          <td class="history-table__summary">{{ r.summary }}</td>
+          <td class="history-table__num">{% if r.health_score is not none %}{{ r.health_score }}{% else %}—{% endif %}</td>
+          <td>
+            {% if r.risk_level %}
+            <span class="history-risk history-risk--{{ r.risk_level }}">{{ r.risk_level }}</span>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="history-empty">Nothing here yet. Run Crop, Fertilizer, or Plant disease to see your timeline fill in.</p>
+  {% endif %}
+
+  {% if field_id %}
+  <p class="history-foot fs-foot-links">
+    <a href="/api/fields/{{ field_id }}/export.csv">Download your records (spreadsheet)</a>
+  </p>
+  {% endif %}
+</div>
+{% endblock %}
